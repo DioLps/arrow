@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'src/appications-list.page.dart';
-// import 'src/home.page.dart';
+// import 'src/appications-list.page.dart';
+import 'src/home.page.dart';
 
 class ArrowApp extends StatelessWidget {
   const ArrowApp({Key? key}) : super(key: key);
@@ -11,10 +11,10 @@ class ArrowApp extends StatelessWidget {
     return MaterialApp(
       title: 'Arrow',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepPurple,
       ),
       debugShowCheckedModeBanner: false,
-      home: const ApplicationsListPage(),
+      home: const HomePage(),
     );
   }
 }
