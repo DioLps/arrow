@@ -1,15 +1,12 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
+import 'dart:ffi';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'category_button.dart';
-
-class ArrowFile {
-  String label;
-  String favRunner;
-  List<String> ext;
-  ArrowFile(this.label, this.favRunner, this.ext);
-}
+import 'constants/categories.dart';
+import 'models/arrow_file.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,40 +16,51 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // int _fileList = 0;
-  final ArrowFile _docsArrowFile = ArrowFile(
-    'Docs',
-    'code',
-    [
-      '.txt',
-      '.js',
-      '.doc',
-      '.docx',
-      '.odt',
-      '.tex',
-      '.wpd',
-    ],
-  );
+  List<File> _fileList = [];
 
-  // void _filterFileList() {
-  //   setState(() {
-  //     _counter++;
-  //   });
-  // }
+  void _updateFileList(List<File> filteredFiles) {
+    setState(() {
+      _fileList = filteredFiles;
+    });
+  }
 
-  void runFile(String path) {
+  List<File> _getAllowedFileByCategory(
+      ArrowFile selectedArrowFile, bool recursive) {
+    List<File> foundFiles = [];
     try {
-      if (kDebugMode) {
-        print('Launching...');
-      }
+      List allFilesAndDirectories =
+          Directory(selectedArrowFile.dirPath).listSync(recursive: recursive);
 
-      Process.run(_docsArrowFile.favRunner, [path]);
+      for (var fileOrDir in allFilesAndDirectories) {
+        String fileExt = ".${fileOrDir.path.split('.').last}";
+        bool isFileAndHadAllowedExt =
+            fileOrDir is File && selectedArrowFile.ext.contains(fileExt);
+        if (isFileAndHadAllowedExt) {
+          foundFiles.add(fileOrDir);
+        }
+      }
     } catch (error) {
       if (kDebugMode) {
-        print("Error trying to Launch ${_docsArrowFile.favRunner}");
-        print("Error: \n $error");
+        print("Error:/n $error");
       }
     }
+
+    return foundFiles;
+  }
+
+  void runFile(String path) {
+    // try {
+    //   if (kDebugMode) {
+    //     print('Launching...');
+    //   }
+
+    //   Process.run(_docsArrowFile.favRunner, [path]);
+    // } catch (error) {
+    //   if (kDebugMode) {
+    //     print("Error trying to Launch ${_docsArrowFile.favRunner}");
+    //     print("Error: \n $error");
+    //   }
+    // }
   }
 
   @override
@@ -91,40 +99,20 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomButton(
-                      icon: Icons.article,
-                      color: Colors.green,
-                      label: _docsArrowFile.label,
-                      onPressed: () {
-                        // Todo: Get list of files
-                      },
-                    ),
-                    CustomButton(
-                      icon: Icons.image,
-                      color: Colors.lightBlue,
-                      label: "Images",
-                      onPressed: () {},
-                    ),
-                    CustomButton(
-                      icon: Icons.video_collection,
-                      color: Colors.pinkAccent,
-                      label: "Videos",
-                      onPressed: () {},
-                    ),
-                    CustomButton(
-                      icon: Icons.note,
-                      color: Colors.orangeAccent,
-                      label: "Music",
-                      onPressed: () {},
-                    ),
-                    CustomButton(
-                      icon: Icons.error,
-                      color: Colors.red,
-                      label: "Unknown",
-                      onPressed: () {},
-                    )
-                  ],
+                  children: categories
+                      .map(
+                        (currentArrowFile) => CustomButton(
+                          icon: currentArrowFile.icon,
+                          color: currentArrowFile.color,
+                          label: currentArrowFile.label,
+                          onPressed: () {
+                            List<File> foundFiles = _getAllowedFileByCategory(
+                                currentArrowFile, true);
+                            _updateFileList(foundFiles);
+                          },
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             )
