@@ -1,6 +1,4 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
-import 'dart:ffi';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -16,17 +14,35 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<File> _fileList = [];
+  late ArrowFile _lastSelected;
+  late List<dynamic> _fileList;
 
-  void _updateFileList(List<File> filteredFiles) {
+  @override
+  void initState() {
+    super.initState();
+    _fileList = [];
+    _lastSelected = categories[0];
+
+    _updateFileList(_getAllowedFileByCategory(categories[0], true));
+  }
+
+  void _updateFileList(List<dynamic> filteredFiles) {
     setState(() {
       _fileList = filteredFiles;
     });
   }
 
-  List<File> _getAllowedFileByCategory(
+  void _selectArrowFile(
+    ArrowFile selectedArrowFile,
+  ) {
+    setState(() {
+      _lastSelected = selectedArrowFile;
+    });
+  }
+
+  List<dynamic> _getAllowedFileByCategory(
       ArrowFile selectedArrowFile, bool recursive) {
-    List<File> foundFiles = [];
+    List<dynamic> foundFiles = [];
     try {
       List allFilesAndDirectories =
           Directory(selectedArrowFile.dirPath).listSync(recursive: recursive);
@@ -35,7 +51,7 @@ class _HomePageState extends State<HomePage> {
         String fileExt = ".${fileOrDir.path.split('.').last}";
         bool isFileAndHadAllowedExt =
             fileOrDir is File && selectedArrowFile.ext.contains(fileExt);
-        if (isFileAndHadAllowedExt) {
+        if (isFileAndHadAllowedExt || fileExt == ".app") {
           foundFiles.add(fileOrDir);
         }
       }
@@ -49,18 +65,106 @@ class _HomePageState extends State<HomePage> {
   }
 
   void runFile(String path) {
-    // try {
-    //   if (kDebugMode) {
-    //     print('Launching...');
-    //   }
+    try {
+      if (kDebugMode) {
+        print('Launching...');
+      }
 
-    //   Process.run(_docsArrowFile.favRunner, [path]);
-    // } catch (error) {
-    //   if (kDebugMode) {
-    //     print("Error trying to Launch ${_docsArrowFile.favRunner}");
-    //     print("Error: \n $error");
-    //   }
-    // }
+      Process.run(_lastSelected.favRunner, [path]);
+    } catch (error) {
+      if (kDebugMode) {
+        print("Error trying to Launch ${_lastSelected.favRunner}");
+        print("Error: \n $error");
+      }
+    }
+  }
+
+  Widget listBuilder() {
+    if (_fileList.isEmpty) {
+      return const Text(
+        'No Items',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.black,
+          decoration: TextDecoration.none,
+          fontWeight: FontWeight.w500,
+        ),
+      );
+    } else {
+      if (_lastSelected.ext.contains('.app')) {
+        return Expanded(
+          child: GridView.count(
+            crossAxisCount: 6,
+            children: _fileList.map((fileItem) {
+              String filePath = fileItem.path.toString().replaceAll(' ', '\\ ');
+
+              dynamic fileRef;
+              bool canReadRef = false;
+              try {
+                fileRef = File("${filePath}/Contents/Resources/AppIcon.icns");
+                canReadRef = fileRef.lengthSync() > 0;
+              } catch (e) {
+                if (kDebugMode) {
+                  print("Couldn't catch the file at: $filePath");
+                }
+                fileRef = null;
+                canReadRef = false;
+              }
+
+              return Column(
+                children: [
+                  canReadRef
+                      ? Image.file(
+                          fileRef,
+                          height: 60,
+                        )
+                      : const Icon(
+                          Icons.image_not_supported,
+                          size: 60,
+                        ),
+                  Text(
+                    fileItem.path.split('/').last,
+                    textAlign: TextAlign.center,
+                  )
+                ],
+              );
+            }).toList(),
+          ),
+        );
+      }
+
+      //
+
+      return Expanded(
+        child: ListView.separated(
+          itemCount: _fileList.length,
+          separatorBuilder: (context, index) {
+            return const Divider();
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              onTap: () {
+                runFile(_fileList[index].path);
+              },
+              contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
+              trailing: const Icon(
+                Icons.open_in_new,
+                color: Colors.black54,
+              ),
+              title: Text(
+                _fileList[index].path.split('/').last,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 
   @override
@@ -70,16 +174,16 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 300,
-                  height: 300,
-                  child: Image.network('https://picsum.photos/250?image=9'),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     SizedBox(
+            //       width: 300,
+            //       height: 300,
+            //       child: Image.network('https://picsum.photos/250?image=10'),
+            //     ),
+            //   ],
+            // ),
             Column(
               children: [
                 Row(
@@ -106,9 +210,10 @@ class _HomePageState extends State<HomePage> {
                           color: currentArrowFile.color,
                           label: currentArrowFile.label,
                           onPressed: () {
-                            List<File> foundFiles = _getAllowedFileByCategory(
-                                currentArrowFile,
-                                currentArrowFile.recursiveSearch);
+                            _selectArrowFile(currentArrowFile);
+                            List<dynamic> foundFiles =
+                                _getAllowedFileByCategory(currentArrowFile,
+                                    currentArrowFile.recursiveSearch);
                             _updateFileList(foundFiles);
                           },
                         ),
@@ -120,30 +225,7 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.only(bottom: 16),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _fileList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    contentPadding:
-                        const EdgeInsets.only(left: 0.0, right: 0.0),
-                    trailing: const Icon(
-                      Icons.open_in_new,
-                      color: Colors.black54,
-                    ),
-                    title: Text(
-                      _fileList[index].path.split('/').last,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black,
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
+            listBuilder()
           ],
         ),
       ),

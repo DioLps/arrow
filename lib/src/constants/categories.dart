@@ -68,7 +68,7 @@ List<ArrowFile> categories = [
   ArrowFile(
     'Apps',
     'open',
-    '/Users/rodrigolopes/Applications',
+    '/Applications',
     Icons.apps,
     Colors.deepPurple,
     ['.app', '.application'],

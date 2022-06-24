@@ -26,13 +26,13 @@ class CustomButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: _borderRadius,
           child: Container(
-            width: 70,
-            height: 70,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
               color: color.withOpacity(.25),
               borderRadius: _borderRadius,
             ),
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(12),
             child: Icon(
               icon,
               color: color,
@@ -40,9 +40,9 @@ class CustomButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         SizedBox(
-          width: 70,
+          width: 60,
           child: Text(
             label,
             textAlign: TextAlign.center,
