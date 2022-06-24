@@ -18,6 +18,7 @@ List<ArrowFile> categories = [
       '.tex',
       '.wpd',
     ],
+    true,
   ),
   ArrowFile(
     'Images',
@@ -32,6 +33,7 @@ List<ArrowFile> categories = [
       '.gif',
       '.png',
     ],
+    false,
   ),
   ArrowFile(
     'Videos',
@@ -45,6 +47,7 @@ List<ArrowFile> categories = [
       '.mov',
       '.avi',
     ],
+    false,
   ),
   ArrowFile(
     'Músicas',
@@ -60,6 +63,7 @@ List<ArrowFile> categories = [
       '.aac',
       '.midi',
     ],
+    false,
   ),
   ArrowFile(
     'Apps',
@@ -67,6 +71,7 @@ List<ArrowFile> categories = [
     '/Users/rodrigolopes/Applications',
     Icons.apps,
     Colors.deepPurple,
-    ['.app'],
+    ['.app', '.application'],
+    false,
   )
 ];

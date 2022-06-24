@@ -107,7 +107,8 @@ class _HomePageState extends State<HomePage> {
                           label: currentArrowFile.label,
                           onPressed: () {
                             List<File> foundFiles = _getAllowedFileByCategory(
-                                currentArrowFile, true);
+                                currentArrowFile,
+                                currentArrowFile.recursiveSearch);
                             _updateFileList(foundFiles);
                           },
                         ),
@@ -115,6 +116,33 @@ class _HomePageState extends State<HomePage> {
                       .toList(),
                 ),
               ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _fileList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    contentPadding:
+                        const EdgeInsets.only(left: 0.0, right: 0.0),
+                    trailing: const Icon(
+                      Icons.open_in_new,
+                      color: Colors.black54,
+                    ),
+                    title: Text(
+                      _fileList[index].path.split('/').last,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black,
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                },
+              ),
             )
           ],
         ),
