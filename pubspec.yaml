@@ -29,6 +29,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  universal_disk_space: ^0.2.3
   
 
 dev_dependencies:

@@ -2,7 +2,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'category_button.dart';
+import 'components/category_button.dart';
+import 'components/disk_chart.dart';
 import 'constants/categories.dart';
 import 'models/arrow_file.dart';
 
@@ -133,8 +134,6 @@ class _HomePageState extends State<HomePage> {
         );
       }
 
-      //
-
       return Expanded(
         child: ListView.separated(
           itemCount: _fileList.length,
@@ -174,16 +173,7 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: Column(
           children: [
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     SizedBox(
-            //       width: 300,
-            //       height: 300,
-            //       child: Image.network('https://picsum.photos/250?image=10'),
-            //     ),
-            //   ],
-            // ),
+            const DiskChart(),
             Column(
               children: [
                 Row(
